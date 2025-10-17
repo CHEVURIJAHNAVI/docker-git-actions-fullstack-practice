@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   mysqldb:
     image: mysql:8
@@ -6,25 +8,31 @@ services:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: habitdb
     ports:
-      - "3307:3306"
+      - "3307:3306"  # external host access
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
       - springboot-mysql-net
- 
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
   backend:
-    image: chevurijahnavi/docker-backend-practice:latest
+    image: chevurijahnavi/docker-backend2:latest
     container_name: springboot2
     ports:
       - "2010:2010"
     depends_on:
-      - mysqldb
+      mysqldb:
+        condition: service_healthy
     restart: on-failure
     networks:
       - springboot-mysql-net
 
   frontend:
-    image: chevurijahnavi/docker-frontend-practice:latest
+    image: chevurijahnavi/docker-frontend2:latest
     container_name: react2
     ports:
       - "5176:80"
@@ -39,3 +47,4 @@ volumes:
 
 networks:
   springboot-mysql-net:
+
