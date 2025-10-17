@@ -1,0 +1,41 @@
+services:
+  mysqldb:
+    image: mysql:8
+    container_name: mysql-db2
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: habitdb
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - springboot-mysql-net
+ 
+  backend:
+    image: chevurijahnavi/docker-backend-practice:latest
+    container_name: springboot2
+    ports:
+      - "2010:2010"
+    depends_on:
+      - mysqldb
+    restart: on-failure
+    networks:
+      - springboot-mysql-net
+
+  frontend:
+    image: chevurijahnavi/docker-frontend-practice:latest
+    container_name: react2
+    ports:
+      - "5176:80"
+    depends_on:
+      - backend
+    restart: on-failure
+    networks:
+      - springboot-mysql-net
+
+volumes:
+  mysql_data:
+
+networks:
+  springboot-mysql-net:
